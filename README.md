@@ -116,5 +116,45 @@ print("y_train_cat shape:", y_train_cat.shape)
 print("y_test_cat shape :", y_test_cat.shape)
 
 # building the cnn model from scratch
+model = Sequential()
+
+#block 1 
+model.add(Conv2D(512, (3,3), activation="relu", input_shape=(64,64,3)))
+model.add(Conv2D(256, (3,3), activation="relu"))
+model.add(MaxPooling2D())
+
+#block 2 
+model.add(Conv2D(256, (3,3), activation="relu"))
+model.add(Conv2D(128, (3,3), activation="relu"))
+model.add(MaxPooling2D())
+
+#block 3
+model.add(Conv2D(128, (3,3), activation="relu"))
+model.add(Conv2D(128, (3,3), activation="relu"))
+model.add(GlobalMaxPooling2D())
+
+#dense layers
+model.add(Dropout(0.25))
+model.add(Dense(128, activation="relu"))
+model.add(Dropout(0.25))
+model.add(Dense(128, activation="relu"))
+model.add(Dropout(0.25))
+
+#output layer
+model.add(Dense(3, activation="softmax"))
+
+#compile
+model.compile(
+    loss="categorical_crossentropy",
+    optimizer="adamax",
+    metrics=["accuracy"]
+)
+
+model.summary()
+
+# building an optimizer to optimize the the results and training the data
+
+
+
 
 
