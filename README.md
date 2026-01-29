@@ -30,14 +30,14 @@ print("CSV loaded:", df.shape)
 df["image_path"] = df["GalaxyID"].astype(str) + ".jpg"
 df["image_path"] = df["image_path"].apply(lambda x: os.path.join(IMAGE_FOLDER, x))
 
-#mapping the images to the classes
-# Spiral → Class4.2
+# mapping the images to the classes
+#Spiral → Class4.2
 df["spiral_prob"] = df["Class4.2"]
 
-# Elliptical (smooth) → Class1.1
+#Elliptical (smooth) → Class1.1
 df["elliptical_prob"] = df["Class1.1"]
 
-# Irregular → combine 3 disturbance classes
+#Irregular → combine 3 disturbance classes
 df["irregular_prob"] = df["Class7.1"] + df["Class7.2"] + df["Class7.3"]
 def assign_label(row):
     probs = [row["spiral_prob"], row["elliptical_prob"], row["irregular_prob"]]
@@ -52,11 +52,11 @@ df["label_id"] = df["label"].map(label_map)
 print("\nLabel Distribution:")
 print(df["label"].value_counts())
 
-# Keep only existing images
+#Keep only existing images
 df = df[df["image_path"].apply(os.path.exists)].reset_index(drop=True)
 print("Images matched:", df.shape)
 
-#the function to show 5 random galaxy images
+# the function to show 5 random galaxy images
 def show_random_images(df, sample=5):
     sample = df.sample(min(sample, len(df)))
     plt.figure(figsize=(16,5))
@@ -71,14 +71,14 @@ def show_random_images(df, sample=5):
 print("random sample images:")
 show_random_images(df, 5)
 
-#splitting the dataset into train_test split 80:20 ratio
+# splitting the dataset into train_test split 80:20 ratio
 train_df, test_df = train_test_split(
     df, test_size=0.2, random_state=42, stratify=df["label_id"])
 
 
 print("Train:", len(train_df), "| Test:", len(test_df))
 
-#now resizing the images from 484 X 484 pixel size to 64 X 64 pixel size for better computation while retaining the data
+# now resizing the images from 484 X 484 pixel size to 64 X 64 pixel size for better computation while retaining the data
 IMG_SHAPE = (64, 64)
 
 
@@ -107,4 +107,14 @@ X_test, y_test = prepare_images(test_df)
 
 
 print("Shapes:", X_train.shape, X_test.shape)
+
+# one hot encoding
+y_train_cat = to_categorical(y_train, num_classes=3)
+y_test_cat  = to_categorical(y_test,  num_classes=3)
+
+print("y_train_cat shape:", y_train_cat.shape)
+print("y_test_cat shape :", y_test_cat.shape)
+
+# building the cnn model from scratch
+
 
