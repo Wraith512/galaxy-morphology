@@ -4,54 +4,48 @@
 # importing necessary libraries
 
 import os
-
 import random
-
 import numpy as np
-
 import pandas as pd
-
 from sklearn.model_selection import train_test_split
-
 from skimage.io import imread
-
 from skimage.transform import resize
-
 from sklearn.metrics import confusion_matrix, classification_report
-
 import matplotlib.pyplot as plt
-
 from tqdm import tqdm
-
-import tensorflow as tf
-
+import tensorflo as tf
 from tensorflow.keras.models import Sequential
-
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dropout, Dense, GlobalMaxPooling2D
-
 from tensorflow.keras.utils import to_categorical
 
 
-#path to the dataset 
+#path to the dataset
+
 IMAGE_FOLDER=r"images_training_rev1\images_training_rev1"
 CSV_PATH=r"training_solutions_rev1\training_solutions_rev1.csv"
 
 #loading the dataset 
+
 df=pd.read_csv(CSV_PATH)
 print("CSV loaded:", df.shape)
 
 #Add full image paths (GalaxyID.jpg)
+
 df["image_path"] = df["GalaxyID"].astype(str) + ".jpg"
 df["image_path"] = df["image_path"].apply(lambda x: os.path.join(IMAGE_FOLDER, x))
 
 # mapping the images to the classes
+
 #Spiral → Class4.2
+
 df["spiral_prob"] = df["Class4.2"]
 
 #Elliptical (smooth) → Class1.1
+
 df["elliptical_prob"] = df["Class1.1"]
 
 #Irregular → combine 3 disturbance classes
+
 df["irregular_prob"] = df["Class7.1"] + df["Class7.2"] + df["Class7.3"]
 def assign_label(row):
     probs = [row["spiral_prob"], row["elliptical_prob"], row["irregular_prob"]]
@@ -67,10 +61,12 @@ print("\nLabel Distribution:")
 print(df["label"].value_counts())
 
 #Keep only existing images
+
 df = df[df["image_path"].apply(os.path.exists)].reset_index(drop=True)
 print("Images matched:", df.shape)
 
 # the function to show 5 random galaxy images
+
 def show_random_images(df, sample=5):
     sample = df.sample(min(sample, len(df)))
     plt.figure(figsize=(16,5))
@@ -86,6 +82,7 @@ print("random sample images:")
 show_random_images(df, 5)
 
 # splitting the dataset into train_test split 80:20 ratio
+
 train_df, test_df = train_test_split(
     df, test_size=0.2, random_state=42, stratify=df["label_id"])
 
@@ -93,6 +90,7 @@ train_df, test_df = train_test_split(
 print("Train:", len(train_df), "| Test:", len(test_df))
 
 # now resizing the images from 484 X 484 pixel size to 64 X 64 pixel size for better computation while retaining the data
+
 IMG_SHAPE = (64, 64)
 
 
