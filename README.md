@@ -1,7 +1,7 @@
 # galaxy-morphology
-#Deep learning based Galaxy morphology (using CNN's)
+# Deep learning based Galaxy morphology (using CNN's)
 
-#importing necessary libraries
+# importing necessary libraries
 
 import os
 import random
@@ -26,7 +26,7 @@ CSV_PATH=r"training_solutions_rev1\training_solutions_rev1.csv"
 df=pd.read_csv(CSV_PATH)
 print("CSV loaded:", df.shape)
 
-# Add full image paths (GalaxyID.jpg)
+#Add full image paths (GalaxyID.jpg)
 df["image_path"] = df["GalaxyID"].astype(str) + ".jpg"
 df["image_path"] = df["image_path"].apply(lambda x: os.path.join(IMAGE_FOLDER, x))
 
@@ -152,7 +152,59 @@ model.compile(
 
 model.summary()
 
-# building an optimizer to optimize the the results and training the data
+# training the data and building a small optimizer to optimize the results
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+#creating the image generator
+datagen = ImageDataGenerator(
+    rotation_range=30,
+    horizontal_flip=True,
+    zoom_range=0.2
+)
+
+#fit generator
+datagen.fit(X_train)
+
+# training the model
+history = model.fit(
+    datagen.flow(X_train, y_train_cat, batch_size=32),
+    validation_data=(X_test, y_test_cat),
+    epochs=10
+)
+
+#evaluating the test data 
+test_loss, test_acc = model.evaluate(X_test, y_test_cat)
+print("Test Accuracy:", test_acc)
+print("Test Loss:", test_loss)
+
+
+# classification report 
+from sklearn.metrics import classification_report, confusion_matrix
+import numpy as np
+
+#Predict classes
+y_pred_probs = model.predict(X_test)
+y_pred = np.argmax(y_pred_probs, axis=1)
+y_true = np.argmax(y_test_cat, axis=1)
+
+#Classification report
+print("\nClassification Report:")
+print(classification_report(
+    y_true, y_pred,
+    target_names=["Spiral", "Elliptical", "Irregular"]
+))
+
+#Confusion matrix
+cm = confusion_matrix(y_true, y_pred)
+print("\nConfusion Matrix:")
+print(cm)
+
+# saving the model for future use 
+model.save("galaxy_cnn_model.h5")
+
+
+
+
 
 
 
